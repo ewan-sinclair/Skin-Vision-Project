@@ -44,6 +44,9 @@ void loop(){
   vibeCounts();
 }
 
+/* Flips pixels which require flipping.
+ * Implemented to work with a fixed 32Hz vibration frequency,
+ * which does not allow for individual vibration or striking. */
 void doToggles(){
   long now = micros();
   long nowMillis = millis();
@@ -65,7 +68,6 @@ void scanAll(){
   if(nextFrameMicros < now-(1000000/framerateHz)) nextFrameMicros = now;
   if( now >= nextFrameMicros ) {
     int newActivePixel;
-    //Serial.println("");
     nextFrameMicros += (1000000/framerateHz);
     Pixel * pixel;
     Pixel * nextPixel;
@@ -81,15 +83,7 @@ void scanAll(){
         Serial.println(newActivePixel);
         break;
       }
-
-      //      Serial.print("[");
-      //      for(int count=0; count < NUM_PIXELS; count++){
-      //        Serial.print(activePixels[count]);
-      //        Serial.print(", ");
-      //      }
-      //      Serial.print("]");
     }
-    //Serial.println("");
   }
 }
 
