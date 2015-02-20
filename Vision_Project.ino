@@ -1,5 +1,8 @@
 #define NUM_PIXELS 4
 #define PERIOD_32HZ_MICROS 31250
+#define SAFE_PERIOD_MICROS 31250
+
+enum strike_states { NEUTRAL, FIRE };
 
 typedef struct {
   int associatedPin;
@@ -7,6 +10,9 @@ typedef struct {
   long periodMicros;
   long vibeCount;
   int freqHz; //Also used to determine whether the pixel is active
+  boolean flipState;
+  long lastOpTimeMicros;
+  enum strike_states strikeState;
 } Pixel;
 
 int pinAssociations[]={4,5,6,7}; //Mappings from pixel array index to pin
@@ -14,10 +20,15 @@ Pixel pixels[NUM_PIXELS]; //This holds all the pixels representing the physical 
 
 long micros_32Hz = 31250; //Period for 32Hz
 int framerateHz = 2;
-boolean currentFlipState = true;
 long nextFlipMicros = -1;
 long nextFrameMicros = -1;
 long nextVibeCountFrameMicros = -1;
+
+void strike(Pixel *pixel);
+boolean isReady(Pixel *pixel);
+boolean setPixel(Pixel *pixel, boolean newState);
+void processStrike(Pixel *pixel);
+void strike(Pixel *pixel);
 
 void setup(){
   
@@ -29,6 +40,8 @@ void setup(){
     pixel->vibeCount = 0;
     pixel->freqHz = 32;
     pixel->associatedPin = pinAssociations[currentPixel];
+    pixel->flipState = false;
+    pixel->lastOpTimeMicros = -1;
     pinMode(pixel->associatedPin, OUTPUT);
     digitalWrite(pixel->associatedPin, LOW);
   }
@@ -53,11 +66,13 @@ void doToggles(){
   if(nextFlipMicros < now-micros_32Hz) nextFlipMicros = now; // In case the counter has drifted off
   if(now >= nextFlipMicros){
     nextFlipMicros += micros_32Hz;
-    currentFlipState = !currentFlipState;
+    Pixel *pixel;
     for(int currentPixel=0; currentPixel<NUM_PIXELS; currentPixel++){
-      if(pixels[currentPixel].freqHz > 0){
-        digitalWrite(pixels[currentPixel].associatedPin, currentFlipState==true? HIGH : LOW);
-        pixels[currentPixel].vibeCount++;
+      pixel = &pixels[currentPixel];
+      if(pixel->freqHz > 0){
+        pixel->flipState = !pixel->flipState;
+        digitalWrite(pixel->associatedPin, pixel->flipState==true? HIGH : LOW);
+        pixel->vibeCount++;
       }
     }
   }
@@ -102,4 +117,36 @@ void vibeCounts(){
     }
     Serial.println("]"); 
   }
+}
+
+// Causes a coil to perform a quick strike. This will cancel any existing vibration, and do nothing if a strike is in progress.
+// Strike states go FIRE -> NEUTRAL. Once at NEUTRAL, the pixel is set false and stays there.
+void strike(Pixel *pixel) {
+  pixel->freqHz = 0;
+  pixel->strikeState=FIRE;
+}
+
+//Resolves any strikes to be performed on the given pixel
+void processStrike(Pixel *pixel) {
+    if(pixel->strikeState == NEUTRAL && pixel->flipState==true) {
+      setPixel(pixel, false);
+    } else if (pixel->strikeState == FIRE) {
+      if(pixel->flipState == true) setPixel(pixel, false);
+      else if (setPixel(pixel, true)) pixel->strikeState = NEUTRAL;
+    }
+}
+
+//Sets a pixel's state, doing appropriate housekeeping and failing if the operation is happening too soon after another flip.
+boolean setPixel(Pixel *pixel, boolean newState) {
+  if (isReady(pixel)) return false;
+  if (  pixel->flipState == newState) return true;
+  pixel->lastOpTimeMicros = micros();
+  pixel->flipState = newState;
+  digitalWrite(pixel->associatedPin, newState);
+  return true;
+}
+
+//Returns true if the pixel is ready to change state, false otherwise.
+boolean isReady(Pixel *pixel) {
+ return  micros() - pixel->lastOpTimeMicros < SAFE_PERIOD_MICROS;
 }
