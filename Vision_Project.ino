@@ -1,8 +1,4 @@
-#define NUM_PIXELS 4
-#define PERIOD_32HZ_MICROS 31250
-#define SAFE_PERIOD_MICROS 31250
-
-enum strike_states { NEUTRAL, FIRE };
+#include "Vision_Project.h"
 
 typedef struct {
   int associatedPin;
@@ -50,11 +46,14 @@ void setup(){
 
 void loop(){
   //Enable what should be on
-  scanAll();
+  //pScanRow();
 
   //Vibrate any pixel that should be vibrated
   doToggles();
-  vibeCounts();
+  //vibeCounts();
+  
+  pvHorizMovingLine();
+  
 }
 
 /* Flips pixels which require flipping.
@@ -73,30 +72,6 @@ void doToggles(){
         pixel->flipState = !pixel->flipState;
         digitalWrite(pixel->associatedPin, pixel->flipState==true? HIGH : LOW);
         pixel->vibeCount++;
-      }
-    }
-  }
-}
-
-void scanAll(){
-  long now = micros();
-  if(nextFrameMicros < now-(1000000/framerateHz)) nextFrameMicros = now;
-  if( now >= nextFrameMicros ) {
-    int newActivePixel;
-    nextFrameMicros += (1000000/framerateHz);
-    Pixel * pixel;
-    Pixel * nextPixel;
-    for(int currentPixel=0; currentPixel<NUM_PIXELS; currentPixel++){ 
-      pixel = &pixels[currentPixel];
-      if(pixel->freqHz > 0) {
-        newActivePixel = (currentPixel+1 < NUM_PIXELS) ? currentPixel+1 : 0;
-        nextPixel = &pixels[newActivePixel];
-        pixel->freqHz = 0;
-        nextPixel->freqHz = 32;
-        Serial.print(currentPixel);
-        Serial.print(" -> ");
-        Serial.println(newActivePixel);
-        break;
       }
     }
   }
@@ -150,3 +125,210 @@ boolean setPixel(Pixel *pixel, boolean newState) {
 boolean isReady(Pixel *pixel) {
  return  micros() - pixel->lastOpTimeMicros < SAFE_PERIOD_MICROS;
 }
+
+/* Causes the pixels in the given indexes to strike at the same time */
+void strikePixels(int *input, int num) {
+  int i;
+  Serial.print("Striking pixels: ");
+  for (i=0; i < num; i++){
+    Serial.print(*input);
+    Serial.print(", ");
+    processStrike(&pixels[*input]);
+    input++;
+  }
+  Serial.println("");
+}
+
+/* Causes the pixels in the given indexes to vibrate for a given number of milliseconds */
+void vibratePixels(int *input, int num, int freqHz, long duration){
+  long startTime = millis();
+  int i;
+  int* index = input;
+  Serial.print("Vibrating pixels: ");
+  for (i=0; i < num; i++){
+    Serial.print(*index);
+    Serial.print(", ");
+    pixels[*index].freqHz = freqHz;
+    index++;
+  }
+  Serial.println("");
+  
+  while (millis() - startTime <= duration) {
+    doToggles();
+  }
+  
+  index = input;
+  for (i=0; i < num; i++){
+    pixels[*index].freqHz = 0;
+    index++;
+  }  
+  
+}
+
+/* #################### Test Pattern Definitions ##################### */
+
+/* Moves a single pixel in a vertical zigzag over the entire array */
+void psVerticalZigZag() {
+	int delayMillis = FRAME_DELAY_MILLIS;
+	
+	int a[] = {0};
+	strikePixels(&a[0],1);
+	delay(delayMillis);
+
+	int a0[] = {5};
+	strikePixels(&a0[0],1);
+	delay(delayMillis);
+	
+	int a1[] = {10};
+	strikePixels(&a1[0], 1);
+	delay(delayMillis);
+
+	int a2[] = {15};
+	strikePixels(&a2[0], 1);
+	delay(delayMillis);
+
+	int a3[] = {20};
+	strikePixels(&a3[0], 1);
+	delay(delayMillis);
+
+	int a4[] = {21};
+	strikePixels(&a4[0], 1);
+	delay(delayMillis);
+
+	int a5[] = {16};
+	strikePixels(&a5[0], 1);
+	delay(delayMillis);
+
+	int a6[] = {11};
+	strikePixels(&a6[0], 1);
+	delay(delayMillis);
+
+	int a7[] = {6};
+	strikePixels(&a7[0], 1);
+	delay(delayMillis);
+
+	int a8[] = {1};
+	strikePixels(&a8[0], 1);
+	delay(delayMillis);
+
+	int a9[] = {2};
+	strikePixels(&a9[0], 1);
+	delay(delayMillis);
+
+	int a10[] = {7};
+	strikePixels(&a10[0], 1);
+	delay(delayMillis);
+
+	int a11[] = {12};
+	strikePixels(&a11[0], 1);
+	delay(delayMillis);
+
+	int a12[] = {17};
+	strikePixels(&a12[0], 1);
+	delay(delayMillis);
+
+	int a13[] = {22};
+	strikePixels(&a13[0], 1);
+	delay(delayMillis);
+
+	int a14[] = {23};
+	strikePixels(&a14[0], 1);
+	delay(delayMillis);
+
+	int a15[] = {18};
+	strikePixels(&a15[0], 1);
+	delay(delayMillis);
+
+	int a16[] = {13};
+	strikePixels(&a16[0], 1);
+	delay(delayMillis);
+
+	int a17[] = {8};
+	strikePixels(&a17[0], 1);
+	delay(delayMillis);
+
+	int a18[] = {3};
+	strikePixels(&a18[0], 1);
+	delay(delayMillis);
+
+	int a19[] = {4};
+	strikePixels(&a19[0], 1);
+	delay(delayMillis);
+
+	int a20[] = {9};
+	strikePixels(&a20[0], 1);
+	delay(delayMillis);
+
+	int a21[] = {14};
+	strikePixels(&a21[0], 1);
+	delay(delayMillis);
+
+	int a22[] = {19};
+	strikePixels(&a22[0], 1);
+	delay(delayMillis);
+
+	int a23[] = {24};
+	strikePixels(&a23[0], 1);
+	delay(delayMillis);
+}
+
+/* Moves a vertical line of strikes from left to right across the array */
+void psHorizMovingLine() {
+  int delayMillis = 400;
+  int a1[] = {0,5,10,15,20};
+  int a2[] = {1,6,11,16,21};
+  int a3[] = {2,7,12,17,22};
+  int a4[] = {3,8,13,18,23};
+  int a5[] = {4,9,14,19,24};
+  strikePixels(&a1[0],5);
+  delay(delayMillis);
+  strikePixels(&a2[0],5);
+  delay(delayMillis);
+  strikePixels(&a3[0],5);
+  delay(delayMillis);
+  strikePixels(&a4[0],5);
+  delay(delayMillis);
+  strikePixels(&a5[0],5);
+  delay(delayMillis);
+}
+
+/* Moves a vertical line of vibrations from left to right across the array */
+void pvHorizMovingLine(){
+  int delayMillis = 400;
+  int a1[] = {0,5,10,15,20};
+  int a2[] = {1,6,11,16,21};
+  int a3[] = {2,7,12,17,22};
+  int a4[] = {3,8,13,18,23};
+  int a5[] = {4,9,14,19,24};
+  vibratePixels(&a1[0],5, 16, delayMillis);
+  vibratePixels(&a2[0],5, 16, delayMillis);
+  vibratePixels(&a3[0],5, 16, delayMillis);
+  vibratePixels(&a4[0],5, 16, delayMillis);
+  vibratePixels(&a5[0],5, 16, delayMillis);
+}
+
+/* Scans vibrations along a single row of pixels*/
+void pvScanRow(){
+  long now = micros();
+  if(nextFrameMicros < now-(1000000/framerateHz)) nextFrameMicros = now;
+  if( now >= nextFrameMicros ) {
+    int newActivePixel;
+    nextFrameMicros += (1000000/framerateHz);
+    Pixel * pixel;
+    Pixel * nextPixel;
+    for(int currentPixel=0; currentPixel<NUM_PIXELS; currentPixel++){ 
+      pixel = &pixels[currentPixel];
+      if(pixel->freqHz > 0) {
+        newActivePixel = (currentPixel+1 < NUM_PIXELS) ? currentPixel+1 : 0;
+        nextPixel = &pixels[newActivePixel];
+        pixel->freqHz = 0;
+        nextPixel->freqHz = 32;
+        Serial.print(currentPixel);
+        Serial.print(" -> ");
+        Serial.println(newActivePixel);
+        break;
+      }
+    }
+  }
+}
+
