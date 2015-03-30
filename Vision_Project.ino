@@ -52,7 +52,7 @@ void loop(){
   doToggles();
   //vibeCounts();
   
-  pvHorizMovingLine();
+  pvHorizMovingLine(400, 16);
   
 }
 
@@ -168,8 +168,7 @@ void vibratePixels(int *input, int num, int freqHz, long duration){
 /* #################### Test Pattern Definitions ##################### */
 
 /* Moves a single pixel in a vertical zigzag over the entire array */
-void psVerticalZigZag() {
-	int delayMillis = FRAME_DELAY_MILLIS;
+void psVerticalZigZag(int delayMillis) {
 	
 	int a[] = {0};
 	strikePixels(&a[0],1);
@@ -273,38 +272,36 @@ void psVerticalZigZag() {
 }
 
 /* Moves a vertical line of strikes from left to right across the array */
-void psHorizMovingLine() {
-  int delayMillis = 400;
+void psHorizMovingLine(int frameDelayMillis) {
   int a1[] = {0,5,10,15,20};
   int a2[] = {1,6,11,16,21};
   int a3[] = {2,7,12,17,22};
   int a4[] = {3,8,13,18,23};
   int a5[] = {4,9,14,19,24};
   strikePixels(&a1[0],5);
-  delay(delayMillis);
+  delay(frameDelayMillis);
   strikePixels(&a2[0],5);
-  delay(delayMillis);
+  delay(frameDelayMillis);
   strikePixels(&a3[0],5);
-  delay(delayMillis);
+  delay(frameDelayMillis);
   strikePixels(&a4[0],5);
-  delay(delayMillis);
+  delay(frameDelayMillis);
   strikePixels(&a5[0],5);
-  delay(delayMillis);
+  delay(frameDelayMillis);
 }
 
 /* Moves a vertical line of vibrations from left to right across the array */
-void pvHorizMovingLine(){
-  int delayMillis = 400;
+void pvHorizMovingLine(int frameDelay, int freqHz){
   int a1[] = {0,5,10,15,20};
   int a2[] = {1,6,11,16,21};
   int a3[] = {2,7,12,17,22};
   int a4[] = {3,8,13,18,23};
   int a5[] = {4,9,14,19,24};
-  vibratePixels(&a1[0],5, 16, delayMillis);
-  vibratePixels(&a2[0],5, 16, delayMillis);
-  vibratePixels(&a3[0],5, 16, delayMillis);
-  vibratePixels(&a4[0],5, 16, delayMillis);
-  vibratePixels(&a5[0],5, 16, delayMillis);
+  vibratePixels(&a2[0],5, freqHz, frameDelay);
+  vibratePixels(&a3[0],5, freqHz, frameDelay);
+  vibratePixels(&a1[0],5, freqHz, frameDelay);
+  vibratePixels(&a4[0],5, freqHz, frameDelay);
+  vibratePixels(&a5[0],5, freqHz, frameDelay);
 }
 
 /* Scans vibrations along a single row of pixels*/
