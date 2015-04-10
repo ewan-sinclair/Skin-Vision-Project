@@ -51,11 +51,13 @@ void loop(){
   //Vibrate any pixel that should be vibrated
   doToggles();
   //vibeCounts();
-  
+
+Serial.println("pvVerticalZigzag");
+pvVerticalZigZag(400, 16);
   Serial.println("pvHorizLine");
   pvHorizMovingLine(400, 16);
-  Serial.println("psHorizLine");
-  psHorizMovingLine(400);
+//  Serial.println("psHorizLine");
+//  psHorizMovingLine(400);
 //  Serial.println("psZigZag");
 //  psVerticalZigZag(200);
 //  Serial.println("pvDiagLine 0");
@@ -282,6 +284,85 @@ void psVerticalZigZag(int delayMillis) {
 	delay(delayMillis);
 }
 
+/* Moves a single pixel in a vertical zigzag over the entire array */
+void pvVerticalZigZag(int frameDelayMillis, int freqHz) {
+	
+	int a[] = {0};
+	vibratePixels(&a[0],1, freqHz, frameDelayMillis);
+
+	int a0[] = {5};
+	vibratePixels(&a0[0],1, freqHz, frameDelayMillis);
+	
+	int a1[] = {10};
+	vibratePixels(&a1[0], 1, freqHz, frameDelayMillis);
+
+	int a2[] = {15};
+	vibratePixels(&a2[0], 1, freqHz, frameDelayMillis);
+
+	int a3[] = {20};
+	vibratePixels(&a3[0], 1, freqHz, frameDelayMillis);
+
+	int a4[] = {21};
+	vibratePixels(&a4[0], 1, freqHz, frameDelayMillis);
+
+	int a5[] = {16};
+	vibratePixels(&a5[0], 1, freqHz, frameDelayMillis);
+
+	int a6[] = {11};
+	vibratePixels(&a6[0], 1, freqHz, frameDelayMillis);
+
+	int a7[] = {6};
+	vibratePixels(&a7[0], 1, freqHz, frameDelayMillis);
+
+	int a8[] = {1};
+	vibratePixels(&a8[0], 1, freqHz, frameDelayMillis);
+
+	int a9[] = {2};
+	vibratePixels(&a9[0], 1, freqHz, frameDelayMillis);
+
+	int a10[] = {7};
+	vibratePixels(&a10[0], 1, freqHz, frameDelayMillis);
+
+	int a11[] = {12};
+	vibratePixels(&a11[0], 1, freqHz, frameDelayMillis);
+
+	int a12[] = {17};
+	vibratePixels(&a12[0], 1, freqHz, frameDelayMillis);
+
+	int a13[] = {22};
+	vibratePixels(&a13[0], 1, freqHz, frameDelayMillis);
+
+	int a14[] = {23};
+	vibratePixels(&a14[0], 1, freqHz, frameDelayMillis);
+
+	int a15[] = {18};
+	vibratePixels(&a15[0], 1, freqHz, frameDelayMillis);
+
+	int a16[] = {13};
+	vibratePixels(&a16[0], 1, freqHz, frameDelayMillis);
+
+	int a17[] = {8};
+	vibratePixels(&a17[0], 1, freqHz, frameDelayMillis);
+
+	int a18[] = {3};
+	vibratePixels(&a18[0], 1, freqHz, frameDelayMillis);
+
+	int a19[] = {4};
+	vibratePixels(&a19[0], 1, freqHz, frameDelayMillis);
+
+	int a20[] = {9};
+	vibratePixels(&a20[0], 1, freqHz, frameDelayMillis);
+
+	int a21[] = {14};
+	vibratePixels(&a21[0], 1, freqHz, frameDelayMillis);
+
+	int a22[] = {19};
+	vibratePixels(&a22[0], 1, freqHz, frameDelayMillis);
+
+	int a23[] = {24};
+	vibratePixels(&a23[0], 1, freqHz, frameDelayMillis);
+}
+
 /* Moves a vertical line of strikes from left to right across the array */
 void psHorizMovingLine(int frameDelayMillis) {
   int a1[] = {0,5,10,15,20};
@@ -308,9 +389,9 @@ void pvHorizMovingLine(int frameDelay, int freqHz){
   int a3[] = {2,7,12,17,22};
   int a4[] = {3,8,13,18,23};
   int a5[] = {4,9,14,19,24};
+  vibratePixels(&a1[0],5, freqHz, frameDelay);
   vibratePixels(&a2[0],5, freqHz, frameDelay);
   vibratePixels(&a3[0],5, freqHz, frameDelay);
-  vibratePixels(&a1[0],5, freqHz, frameDelay);
   vibratePixels(&a4[0],5, freqHz, frameDelay);
   vibratePixels(&a5[0],5, freqHz, frameDelay);
 }
