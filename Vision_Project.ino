@@ -6,9 +6,8 @@ typedef struct {
   long periodMicros;
   long vibeCount;
   int freqHz; //Also used to determine whether the pixel is active
-  boolean flipState;
-  long lastOpTimeMicros;
-  enum strike_states strikeState;
+  boolean flipState; //Tracks whether the pixel is down (true) or up (false)
+  long lastOpTimeMicros; //Tracks when the pixel last changed state
 } Pixel;
 
 int pinAssociations[]={ 3,4,5,6,7, 8,9,10,11,12, 52,50,48,46,44, 40,38,36,34,32, 53,51,49,47,45 }; //Mappings from pixel array index to pin
@@ -23,8 +22,6 @@ long nextVibeCountFrameMicros = -1;
 void strike(Pixel *pixel);
 boolean isReady(Pixel *pixel);
 boolean setPixel(Pixel *pixel, boolean newState);
-void processStrike(Pixel *pixel);
-void strike(Pixel *pixel);
 
 void setup(){
   
@@ -41,14 +38,14 @@ void loop(){
   doToggles();
   //vibeCounts();
 
-//Serial.println("pvVerticalZigzag");
-//pvVerticalZigZag(400, 16);
-//  Serial.println("pvHorizLine");
-//  pvHorizMovingLine(400, 16);
-//  Serial.println("psHorizLine");
-//  psHorizMovingLine(400);
-//  Serial.println("psZigZag");
-//  psVerticalZigZag(200);
+  Serial.println("pvVerticalZigzag");
+  pvVerticalZigZag(400, 16);
+  Serial.println("pvHorizLine");
+  pvHorizMovingLine(400, 16);
+  Serial.println("psHorizLine");
+  psHorizMovingLine(400);
+  Serial.println("psZigZag");
+  psVerticalZigZag(200);
   Serial.println("pvDiagLine 0");
   psDiagonalMovingLine(0, 400);
   Serial.println("pvDiagLine 1");
@@ -94,23 +91,6 @@ void vibeCounts(){
     }
     Serial.println("]"); 
   }
-}
-
-// Causes a coil to perform a quick strike. This will cancel any existing vibration, and do nothing if a strike is in progress.
-// Strike states go FIRE -> NEUTRAL. Once at NEUTRAL, the pixel is set false and stays there.
-void strike(Pixel *pixel) {
-  pixel->freqHz = 0;
-  pixel->strikeState=FIRE;
-}
-
-//Resolves any strikes to be performed on the given pixel
-void processStrike(Pixel *pixel) {
-    if(pixel->strikeState == NEUTRAL && pixel->flipState==true) {
-      setPixel(pixel, false);
-    } else if (pixel->strikeState == FIRE) {
-      if(pixel->flipState == true) setPixel(pixel, false);
-      else if (setPixel(pixel, true)) pixel->strikeState = NEUTRAL;
-    }
 }
 
 //Sets a pixel's state, doing appropriate housekeeping and failing if the operation is happening too soon after another flip.
@@ -219,159 +199,109 @@ void psVerticalZigZag(int delayMillis) {
 	
 	int a[] = {0};
 	strikePixels(&a[0],1, delayMillis);
-
 	int a0[] = {5};
-	strikePixels(&a0[0],1, delayMillis);
-	
+	strikePixels(&a0[0],1, delayMillis);	
 	int a1[] = {10};
 	strikePixels(&a1[0], 1, delayMillis);
-
 	int a2[] = {15};
 	strikePixels(&a2[0], 1, delayMillis);
-
 	int a3[] = {20};
 	strikePixels(&a3[0], 1, delayMillis);
-
 	int a4[] = {21};
 	strikePixels(&a4[0], 1, delayMillis);
-
 	int a5[] = {16};
 	strikePixels(&a5[0], 1, delayMillis);
-
 	int a6[] = {11};
 	strikePixels(&a6[0], 1, delayMillis);
-
 	int a7[] = {6};
 	strikePixels(&a7[0], 1, delayMillis);
-
 	int a8[] = {1};
 	strikePixels(&a8[0], 1, delayMillis);
-
 	int a9[] = {2};
 	strikePixels(&a9[0], 1, delayMillis);
-
 	int a10[] = {7};
 	strikePixels(&a10[0], 1, delayMillis);
-
 	int a11[] = {12};
 	strikePixels(&a11[0], 1, delayMillis);
-
 	int a12[] = {17};
 	strikePixels(&a12[0], 1, delayMillis);
-
 	int a13[] = {22};
 	strikePixels(&a13[0], 1, delayMillis);
-
 	int a14[] = {23};
 	strikePixels(&a14[0], 1, delayMillis);
-
 	int a15[] = {18};
 	strikePixels(&a15[0], 1, delayMillis);
-
 	int a16[] = {13};
 	strikePixels(&a16[0], 1, delayMillis);
-
 	int a17[] = {8};
 	strikePixels(&a17[0], 1, delayMillis);
-
 	int a18[] = {3};
 	strikePixels(&a18[0], 1, delayMillis);
-
 	int a19[] = {4};
 	strikePixels(&a19[0], 1, delayMillis);
-
 	int a20[] = {9};
 	strikePixels(&a20[0], 1, delayMillis);
-
 	int a21[] = {14};
 	strikePixels(&a21[0], 1, delayMillis);
-
 	int a22[] = {19};
 	strikePixels(&a22[0], 1, delayMillis);
-
 	int a23[] = {24};
 	strikePixels(&a23[0], 1, delayMillis);
 }
-
 /* Moves a single pixel in a vertical zigzag over the entire array */
 void pvVerticalZigZag(int frameDelayMillis, int freqHz) {
 	
 	int a[] = {0};
 	vibratePixels(&a[0],1, freqHz, frameDelayMillis);
-
 	int a0[] = {5};
 	vibratePixels(&a0[0],1, freqHz, frameDelayMillis);
-	
 	int a1[] = {10};
 	vibratePixels(&a1[0], 1, freqHz, frameDelayMillis);
-
 	int a2[] = {15};
 	vibratePixels(&a2[0], 1, freqHz, frameDelayMillis);
-
 	int a3[] = {20};
 	vibratePixels(&a3[0], 1, freqHz, frameDelayMillis);
-
 	int a4[] = {21};
 	vibratePixels(&a4[0], 1, freqHz, frameDelayMillis);
-
 	int a5[] = {16};
 	vibratePixels(&a5[0], 1, freqHz, frameDelayMillis);
-
 	int a6[] = {11};
 	vibratePixels(&a6[0], 1, freqHz, frameDelayMillis);
-
 	int a7[] = {6};
 	vibratePixels(&a7[0], 1, freqHz, frameDelayMillis);
-
 	int a8[] = {1};
 	vibratePixels(&a8[0], 1, freqHz, frameDelayMillis);
-
 	int a9[] = {2};
 	vibratePixels(&a9[0], 1, freqHz, frameDelayMillis);
-
 	int a10[] = {7};
 	vibratePixels(&a10[0], 1, freqHz, frameDelayMillis);
-
 	int a11[] = {12};
 	vibratePixels(&a11[0], 1, freqHz, frameDelayMillis);
-
 	int a12[] = {17};
 	vibratePixels(&a12[0], 1, freqHz, frameDelayMillis);
-
 	int a13[] = {22};
 	vibratePixels(&a13[0], 1, freqHz, frameDelayMillis);
-
 	int a14[] = {23};
 	vibratePixels(&a14[0], 1, freqHz, frameDelayMillis);
-
 	int a15[] = {18};
 	vibratePixels(&a15[0], 1, freqHz, frameDelayMillis);
-
 	int a16[] = {13};
 	vibratePixels(&a16[0], 1, freqHz, frameDelayMillis);
-
 	int a17[] = {8};
 	vibratePixels(&a17[0], 1, freqHz, frameDelayMillis);
-
 	int a18[] = {3};
 	vibratePixels(&a18[0], 1, freqHz, frameDelayMillis);
-
 	int a19[] = {4};
 	vibratePixels(&a19[0], 1, freqHz, frameDelayMillis);
-
 	int a20[] = {9};
 	vibratePixels(&a20[0], 1, freqHz, frameDelayMillis);
-
 	int a21[] = {14};
 	vibratePixels(&a21[0], 1, freqHz, frameDelayMillis);
-
 	int a22[] = {19};
 	vibratePixels(&a22[0], 1, freqHz, frameDelayMillis);
-
 	int a23[] = {24};
 	vibratePixels(&a23[0], 1, freqHz, frameDelayMillis);
 }
-
 /* Moves a vertical line of strikes from left to right across the array */
 void psHorizMovingLine(int frameDelayMillis) {
   int a1[] = {0,5,10,15,20};
