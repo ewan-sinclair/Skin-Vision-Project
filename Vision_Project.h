@@ -4,7 +4,7 @@
 #define ARRAY_WIDTH 5
 #define ARRAY_HEIGHT 5
 #define FRAME_DELAY_MILLIS 330
-
+#define STRIKE_DOWN_TIME 64
 enum strike_states { NEUTRAL, FIRE };
 
 //int *p1Frames[25];

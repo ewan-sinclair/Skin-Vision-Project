@@ -29,18 +29,7 @@ void strike(Pixel *pixel);
 void setup(){
   
   Serial.begin(9600);
-  Pixel *pixel;
-  for(int currentPixel=0; currentPixel<NUM_PIXELS; currentPixel++){
-    pixel = &pixels[currentPixel];
-    pixel->nextTimeMicros = -1;
-    pixel->vibeCount = 0;
-    pixel->freqHz = 32;
-    pixel->associatedPin = pinAssociations[currentPixel];
-    pixel->flipState = false;
-    pixel->lastOpTimeMicros = -1;
-    pinMode(pixel->associatedPin, OUTPUT);
-    digitalWrite(pixel->associatedPin, LOW);
-  }
+  resetArray();
 
 }
 
@@ -52,18 +41,18 @@ void loop(){
   doToggles();
   //vibeCounts();
 
-Serial.println("pvVerticalZigzag");
-pvVerticalZigZag(400, 16);
-  Serial.println("pvHorizLine");
-  pvHorizMovingLine(400, 16);
+//Serial.println("pvVerticalZigzag");
+//pvVerticalZigZag(400, 16);
+//  Serial.println("pvHorizLine");
+//  pvHorizMovingLine(400, 16);
 //  Serial.println("psHorizLine");
 //  psHorizMovingLine(400);
 //  Serial.println("psZigZag");
 //  psVerticalZigZag(200);
-//  Serial.println("pvDiagLine 0");
-//  psDiagonalMovingLine(0, 400);
-//  Serial.println("pvDiagLine 1");
-//  psDiagonalMovingLine(1, 400);
+  Serial.println("pvDiagLine 0");
+  psDiagonalMovingLine(0, 400);
+  Serial.println("pvDiagLine 1");
+  psDiagonalMovingLine(1, 400);
   
 //  pvAll(1000, 1);
   
@@ -139,17 +128,62 @@ boolean isReady(Pixel *pixel) {
  return  micros() - pixel->lastOpTimeMicros < SAFE_PERIOD_MICROS;
 }
 
-/* Causes the pixels in the given indexes to strike at the same time */
-void strikePixels(int *input, int num) {
+/* Causes the pixels in the given indexes to strike at the same time
+returns the number of milliseconds consumed by the strike call. */
+int strikePixels(int *input, int num, long delayMillis) {
+  
+  long start = millis();
   int i;
+  int *index = input;
+  boolean moving = false;
   Serial.print("Striking pixels: ");
   for (i=0; i < num; i++){
-    Serial.print(*input);
-    Serial.print(", ");
-    processStrike(&pixels[*input]);
-    input++;
+    moving = moving || setPixel(&pixels[*input], false);
+    index++;
   }
+  
+  if(moving) delay(32); //Time for the pins to reset if they hadn't
+  index = input;
+
+  for (i=0; i < num; i++){
+    Serial.print(*index);
+    Serial.print(", ");
+    setPixel(&pixels[*index], true);
+    index++;
+  }
+  
+  delay(STRIKE_DOWN_TIME);
+  index = input;
+  
+  for (i=0; i < num; i++){
+    setPixel(&pixels[*index], false);
+    index++;
+  }
+
   Serial.println("");
+  long millisElapsed = millis() - start;
+  long remainingMillis = delayMillis - millisElapsed;
+  if(remainingMillis > 0) {
+    delay(remainingMillis);
+    return delayMillis;
+  } else {
+    return millisElapsed;
+  }
+}
+
+void resetArray() {
+  Pixel *pixel;
+  for(int currentPixel=0; currentPixel<NUM_PIXELS; currentPixel++){
+    pixel = &pixels[currentPixel];
+    pixel->nextTimeMicros = -1;
+    pixel->vibeCount = 0;
+    pixel->freqHz = 0;
+    pixel->associatedPin = pinAssociations[currentPixel];
+    pixel->flipState = false;
+    pixel->lastOpTimeMicros = -1;
+    pinMode(pixel->associatedPin, OUTPUT);
+    digitalWrite(pixel->associatedPin, LOW);
+  }
 }
 
 /* Causes the pixels in the given indexes to vibrate for a given number of milliseconds */
@@ -184,104 +218,79 @@ void vibratePixels(int *input, int num, int freqHz, long durationMillis){
 void psVerticalZigZag(int delayMillis) {
 	
 	int a[] = {0};
-	strikePixels(&a[0],1);
-	delay(delayMillis);
+	strikePixels(&a[0],1, delayMillis);
 
 	int a0[] = {5};
-	strikePixels(&a0[0],1);
-	delay(delayMillis);
+	strikePixels(&a0[0],1, delayMillis);
 	
 	int a1[] = {10};
-	strikePixels(&a1[0], 1);
-	delay(delayMillis);
+	strikePixels(&a1[0], 1, delayMillis);
 
 	int a2[] = {15};
-	strikePixels(&a2[0], 1);
-	delay(delayMillis);
+	strikePixels(&a2[0], 1, delayMillis);
 
 	int a3[] = {20};
-	strikePixels(&a3[0], 1);
-	delay(delayMillis);
+	strikePixels(&a3[0], 1, delayMillis);
 
 	int a4[] = {21};
-	strikePixels(&a4[0], 1);
-	delay(delayMillis);
+	strikePixels(&a4[0], 1, delayMillis);
 
 	int a5[] = {16};
-	strikePixels(&a5[0], 1);
-	delay(delayMillis);
+	strikePixels(&a5[0], 1, delayMillis);
 
 	int a6[] = {11};
-	strikePixels(&a6[0], 1);
-	delay(delayMillis);
+	strikePixels(&a6[0], 1, delayMillis);
 
 	int a7[] = {6};
-	strikePixels(&a7[0], 1);
-	delay(delayMillis);
+	strikePixels(&a7[0], 1, delayMillis);
 
 	int a8[] = {1};
-	strikePixels(&a8[0], 1);
-	delay(delayMillis);
+	strikePixels(&a8[0], 1, delayMillis);
 
 	int a9[] = {2};
-	strikePixels(&a9[0], 1);
-	delay(delayMillis);
+	strikePixels(&a9[0], 1, delayMillis);
 
 	int a10[] = {7};
-	strikePixels(&a10[0], 1);
-	delay(delayMillis);
+	strikePixels(&a10[0], 1, delayMillis);
 
 	int a11[] = {12};
-	strikePixels(&a11[0], 1);
-	delay(delayMillis);
+	strikePixels(&a11[0], 1, delayMillis);
 
 	int a12[] = {17};
-	strikePixels(&a12[0], 1);
-	delay(delayMillis);
+	strikePixels(&a12[0], 1, delayMillis);
 
 	int a13[] = {22};
-	strikePixels(&a13[0], 1);
-	delay(delayMillis);
+	strikePixels(&a13[0], 1, delayMillis);
 
 	int a14[] = {23};
-	strikePixels(&a14[0], 1);
-	delay(delayMillis);
+	strikePixels(&a14[0], 1, delayMillis);
 
 	int a15[] = {18};
-	strikePixels(&a15[0], 1);
-	delay(delayMillis);
+	strikePixels(&a15[0], 1, delayMillis);
 
 	int a16[] = {13};
-	strikePixels(&a16[0], 1);
-	delay(delayMillis);
+	strikePixels(&a16[0], 1, delayMillis);
 
 	int a17[] = {8};
-	strikePixels(&a17[0], 1);
-	delay(delayMillis);
+	strikePixels(&a17[0], 1, delayMillis);
 
 	int a18[] = {3};
-	strikePixels(&a18[0], 1);
-	delay(delayMillis);
+	strikePixels(&a18[0], 1, delayMillis);
 
 	int a19[] = {4};
-	strikePixels(&a19[0], 1);
-	delay(delayMillis);
+	strikePixels(&a19[0], 1, delayMillis);
 
 	int a20[] = {9};
-	strikePixels(&a20[0], 1);
-	delay(delayMillis);
+	strikePixels(&a20[0], 1, delayMillis);
 
 	int a21[] = {14};
-	strikePixels(&a21[0], 1);
-	delay(delayMillis);
+	strikePixels(&a21[0], 1, delayMillis);
 
 	int a22[] = {19};
-	strikePixels(&a22[0], 1);
-	delay(delayMillis);
+	strikePixels(&a22[0], 1, delayMillis);
 
 	int a23[] = {24};
-	strikePixels(&a23[0], 1);
-	delay(delayMillis);
+	strikePixels(&a23[0], 1, delayMillis);
 }
 
 /* Moves a single pixel in a vertical zigzag over the entire array */
@@ -370,16 +379,11 @@ void psHorizMovingLine(int frameDelayMillis) {
   int a3[] = {2,7,12,17,22};
   int a4[] = {3,8,13,18,23};
   int a5[] = {4,9,14,19,24};
-  strikePixels(&a1[0],5);
-  delay(frameDelayMillis);
-  strikePixels(&a2[0],5);
-  delay(frameDelayMillis);
-  strikePixels(&a3[0],5);
-  delay(frameDelayMillis);
-  strikePixels(&a4[0],5);
-  delay(frameDelayMillis);
-  strikePixels(&a5[0],5);
-  delay(frameDelayMillis);
+  strikePixels(&a1[0],5, frameDelayMillis);
+  strikePixels(&a2[0],5, frameDelayMillis);
+  strikePixels(&a3[0],5, frameDelayMillis);
+  strikePixels(&a4[0],5, frameDelayMillis);
+  strikePixels(&a5[0],5, frameDelayMillis);
 }
 
 /* Moves a vertical line of vibrations from left to right across the array */
@@ -397,6 +401,8 @@ void pvHorizMovingLine(int frameDelay, int freqHz){
 }
 
 void psDiagonalMovingLine(int direction, long delayMillis) {
+
+  resetArray(); 
   
   int rows[][5] = {
     {0},
@@ -415,13 +421,11 @@ void psDiagonalMovingLine(int direction, long delayMillis) {
   int i;  
   if(direction > 0){ 
     for(i=0; i<9; i++){
-      strikePixels(&rows[i][0], sizes[i]);
-      delay(delayMillis);     
+      strikePixels(&rows[i][0], sizes[i], delayMillis);
     }
   } else {
     for(i=8; i>=0; i--){
-      strikePixels(&rows[i][0], sizes[i]);
-      delay(delayMillis);     
+      strikePixels(&rows[i][0], sizes[i], delayMillis);
     }
     
   }
