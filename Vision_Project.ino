@@ -11,7 +11,7 @@ typedef struct {
   enum strike_states strikeState;
 } Pixel;
 
-int pinAssociations[]={4,5,6,7}; //Mappings from pixel array index to pin
+int pinAssociations[]={ 3,4,5,6,7, 8,9,10,11,12, 52,50,48,46,44, 40,38,36,34,32, 53,51,49,47,45 }; //Mappings from pixel array index to pin
 Pixel pixels[NUM_PIXELS]; //This holds all the pixels representing the physical coils
 
 long micros_32Hz = 31250; //Period for 32Hz
@@ -52,7 +52,18 @@ void loop(){
   doToggles();
   //vibeCounts();
   
+  Serial.println("pvHorizLine");
   pvHorizMovingLine(400, 16);
+  Serial.println("psHorizLine");
+  psHorizMovingLine(400);
+//  Serial.println("psZigZag");
+//  psVerticalZigZag(200);
+//  Serial.println("pvDiagLine 0");
+//  psDiagonalMovingLine(0, 400);
+//  Serial.println("pvDiagLine 1");
+//  psDiagonalMovingLine(1, 400);
+  
+//  pvAll(1000, 1);
   
 }
 
@@ -140,7 +151,7 @@ void strikePixels(int *input, int num) {
 }
 
 /* Causes the pixels in the given indexes to vibrate for a given number of milliseconds */
-void vibratePixels(int *input, int num, int freqHz, long duration){
+void vibratePixels(int *input, int num, int freqHz, long durationMillis){
   long startTime = millis();
   int i;
   int* index = input;
@@ -153,7 +164,7 @@ void vibratePixels(int *input, int num, int freqHz, long duration){
   }
   Serial.println("");
   
-  while (millis() - startTime <= duration) {
+  while (millis() - startTime <= durationMillis) {
     doToggles();
   }
   
@@ -304,6 +315,38 @@ void pvHorizMovingLine(int frameDelay, int freqHz){
   vibratePixels(&a5[0],5, freqHz, frameDelay);
 }
 
+void psDiagonalMovingLine(int direction, long delayMillis) {
+  
+  int rows[][5] = {
+    {0},
+    {5,1},
+    {10,6,2},
+    {15,11,7,3},
+    {20,16,12,8,4},
+    {21,17,13,9},
+    {22,18,14},
+    {23,19},
+    {24}
+  };
+  
+  int sizes[] = {1,2,3,4,5,4,3,2,1};
+
+  int i;  
+  if(direction > 0){ 
+    for(i=0; i<9; i++){
+      strikePixels(&rows[i][0], sizes[i]);
+      delay(delayMillis);     
+    }
+  } else {
+    for(i=8; i>=0; i--){
+      strikePixels(&rows[i][0], sizes[i]);
+      delay(delayMillis);     
+    }
+    
+  }
+  
+}
+
 /* Scans vibrations along a single row of pixels*/
 void pvScanRow(){
   long now = micros();
@@ -329,3 +372,8 @@ void pvScanRow(){
   }
 }
 
+/* Vibrates all pixels in the array */
+void pvAll(long frameDelay, int freqHz) {
+  int a1[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
+  vibratePixels(&a1[0], 25, freqHz, 1000);
+}

@@ -1,4 +1,4 @@
-#define NUM_PIXELS 4
+#define NUM_PIXELS 25
 #define PERIOD_32HZ_MICROS 31250
 #define SAFE_PERIOD_MICROS 31250
 #define ARRAY_WIDTH 5
@@ -34,3 +34,4 @@ enum strike_states { NEUTRAL, FIRE };
 //int p1f2[] = {14};
 //int p1f2[] = {19};
 //int p1f2[] = {24};
+
