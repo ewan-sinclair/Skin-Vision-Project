@@ -46,10 +46,15 @@ void loop(){
   psHorizMovingLine(400);
   Serial.println("psZigZag");
   psVerticalZigZag(200);
-  Serial.println("pvDiagLine 0");
+  Serial.println("psDiagLine 0");
   psDiagonalMovingLine(0, 400);
-  Serial.println("pvDiagLine 1");
+  Serial.println("psDiagLine 1");
   psDiagonalMovingLine(1, 400);
+  Serial.println("pvDiagLine 0");
+  pvDiagonalMovingLine(0, 400, 16);
+  Serial.println("pvDiagLine 1");
+  pvDiagonalMovingLine(1, 400, 16);
+
   
 //  pvAll(1000, 1);
   
@@ -356,6 +361,36 @@ void psDiagonalMovingLine(int direction, long delayMillis) {
   } else {
     for(i=8; i>=0; i--){
       strikePixels(&rows[i][0], sizes[i], delayMillis);
+    }
+    
+  }
+  
+}
+
+void pvDiagonalMovingLine(int direction, long delayMillis, int freqHz) {
+  
+  int rows[][5] = {
+    {0},
+    {5,1},
+    {10,6,2},
+    {15,11,7,3},
+    {20,16,12,8,4},
+    {21,17,13,9},
+    {22,18,14},
+    {23,19},
+    {24}
+  };
+  
+  int sizes[] = {1,2,3,4,5,4,3,2,1};
+
+  int i;  
+  if(direction > 0){ 
+    for(i=0; i<9; i++){
+      vibratePixels(&rows[i][0], sizes[i], freqHz, delayMillis);
+    }
+  } else {
+    for(i=8; i>=0; i--){
+      vibratePixels(&rows[i][0], sizes[i], freqHz, delayMillis);
     }
     
   }
